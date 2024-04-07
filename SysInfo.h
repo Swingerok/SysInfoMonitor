@@ -30,7 +30,7 @@ public:
 
 
 
-    struct CPUInfo {
+    struct CPUInfo { //Статическая инфа, она будет собираться при создании класса под линукс или виндовс
 
         struct Core {
             uint64_t physicalId;

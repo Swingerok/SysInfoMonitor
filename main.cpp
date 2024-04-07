@@ -1,13 +1,13 @@
 #include <iostream>
 #include "SysInfo.h"
+#include "LinuxInfo.h"
+#include "WindowsInfo.h"
 
 using namespace std;
 
 int main() {
 
-    SysInfo inf;
-
-    cout << inf.getRAMTotal() / 1024 << endl;
+    LinuxInfo inf;
 
     return 0;
 }
