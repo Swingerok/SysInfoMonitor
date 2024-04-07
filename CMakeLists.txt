@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.23)
+project(untitled1)
+
+set(CMAKE_CXX_STANDARD 23)
+
+add_executable(untitled1
+        SysInfo.h main.cpp SysInfo.cpp LinuxInfo.cpp LinuxInfo.h WindowsInfo.cpp WindowsInfo.h)
