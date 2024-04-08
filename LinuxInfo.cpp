@@ -1,50 +1,8 @@
 #include "LinuxInfo.h"
 
-auto ltrim = [](std::string s) {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(),
-                                    std::not1(std::ptr_fun<int, int>(std::isspace))));
-    return s;
-};
+#include <utility>
 
-auto getint = [](std::string str) {
 
-    str.erase(std::remove_if(
-                      str.begin(),
-                      str.end(),
-                      [](char ch) {
-                          return !std::isdigit(ch);
-                      }),
-              str.end()
-    );
-    return std::stoi(str);
-};
-
-auto getdouble = [](std::string str) {
-
-    str.erase(std::remove_if(
-                      str.begin(),
-                      str.end(),
-                      [](char ch) {
-                          if (ch == '.') {
-                              return false;
-                          }
-                          return !std::isdigit(ch);
-                      }),
-              str.end()
-    );
-    return std::stod(str);
-};
-
-auto getval = [](std::string str) {
-
-    int i = 0;
-    do {
-        i++;
-    } while (str[i] != ':');
-    std::string res = str.substr(i + 1, str.size());
-    res.shrink_to_fit();
-    return res;
-};
 
 uint64_t LinuxInfo::getRAMTotal() {
     return si.totalram;
@@ -67,11 +25,9 @@ uint32_t LinuxInfo::getCPUCoresNum() {
 LinuxInfo::LinuxInfo() : SysInfo() {
     sysinfo(&si);
 
-    utsname kernelInfo{};
+    uname(&kernelInf);
 
-    uname(&kernelInfo);
-
-    cpuInfo.arch = kernelInfo.machine;
+    cpuInfo.arch = kernelInf.machine;
 
     std::ifstream file("/proc/cpuinfo");
 
@@ -93,16 +49,16 @@ LinuxInfo::LinuxInfo() : SysInfo() {
     while (it != lines.end()) {
 
         if ((*it).starts_with("processor")) {
-            CPUInfo::Core core{(uint64_t) getint(*it)};
+            CPUInfo::Core core{(uint64_t) Str::getint(*it)};
             while (!(*(it)).starts_with("power management")) {
                 if ((*it).starts_with("model name")) {
-                    cpuInfo.model = ltrim(getval(*it));
+                    cpuInfo.model = Str::getval(*it);
                 } else if ((*it).starts_with("physical id")) {
-                    core.physicalId = (uint64_t) getint(*it);
+                    core.physicalId = (uint64_t) Str::getint(*it);
                 } else if ((*it).starts_with("cpu MHz")) {
-                    core.speed = getdouble(*it);
+                    core.speed = Str::getdouble(*it);
                 } else if ((*it).starts_with("cache size")) {
-                    core.cacheSize = (uint64_t) getint(*it);
+                    core.cacheSize = Str::getint(*it);
                 }
                 it++;
             }
@@ -115,11 +71,11 @@ LinuxInfo::LinuxInfo() : SysInfo() {
 }
 
 std::string LinuxInfo::getOSVersion() {
-    return std::string();
+    return kernelInf.version;
 }
 
 std::string LinuxInfo::getOSArch() {
-    return std::string();
+    return cpuInfo.arch;
 }
 
 std::string LinuxInfo::getCPUModel() {
@@ -147,19 +103,111 @@ std::vector<LinuxInfo::NetworkAdapterInfo> LinuxInfo::getNetworkAdaptersInfo() {
 }
 
 double LinuxInfo::getSystemUptime() {
-    return 0;
+    std::ifstream file("/proc/uptime");
+
+    std::string str;
+
+    if (file.is_open()) {
+        std::getline(file, str);
+    }
+    file.close();
+
+    return std::stod(str);
 }
 
 uint32_t LinuxInfo::getTotalCPUUsage() {
-    return 0;
+    std::ifstream file("/proc/stat");
+
+    std::string str1;
+    std::string str2;
+
+    if (file.is_open()) {
+        getline(file, str1);
+    }
+    file.close();
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+
+    std::ifstream file2("/proc/stat");
+
+    if (file2.is_open()) {
+        getline(file2, str2);
+    }
+    file2.close();
+
+    return calculateCPUUsage(str1, str2);
 }
 
 std::vector<uint32_t> LinuxInfo::getCPUCoresUsage() {
-    return std::vector<uint32_t>();
+    std::ifstream file("/proc/stat");
+
+    std::vector<std::string> vec1;
+    std::vector<std::string> vec2;
+
+    std::string temp;
+
+    if (file.is_open()) {
+        getline(file, temp);
+        getline(file, temp);
+        while (temp.starts_with("cpu")) {
+            vec1.push_back(temp);
+            getline(file, temp);
+        }
+    }
+    file.close();
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    std::ifstream file2("/proc/stat");
+
+    if (file2.is_open()) {
+        getline(file2, temp);
+        getline(file2, temp);
+        while (temp.starts_with("cpu")) {
+            vec2.push_back(temp);
+            getline(file2, temp);
+        }
+    }
+    file2.close();
+
+    std::vector<uint32_t> res;
+
+    for (int i = 0; i < vec1.size(); i++) {
+        res.push_back(calculateCPUUsage(vec1[i], vec2[i]));
+    }
+
+    return res;
+}
+
+uint32_t LinuxInfo::calculateCPUUsage(std::string str1, std::string str2) {
+
+    std::vector<std::string> first = Str::split(std::move(str1));
+
+    std::vector<std::string> second = Str::split(std::move(str2));
+
+    double total_1 = 0;
+    double total_2 = 0;
+    double work_1 = 0;
+    double work_2 = 0;
+
+    for (int i = 2; i < first.size(); i++) {
+        total_1 += std::stod(first[i]);
+        total_2 += std::stod(second[i]);
+        if (i <= 4) {
+            work_1 += std::stod(first[i]);
+            work_2 += std::stod(second[i]);
+        }
+    }
+
+    double work =  work_2 - work_1;
+    double total = total_2 - total_1;
+
+    return (work / total) * 100;
 }
 
 int LinuxInfo::getCurrentTasksNum() {
-    return 0;
+    sysinfo(&si);
+    return si.procs;
 }
 
 uint64_t LinuxInfo::getDriveCurrentWrite(std::string driveName) {

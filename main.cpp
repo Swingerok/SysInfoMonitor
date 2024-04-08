@@ -9,9 +9,13 @@ int main() {
 
     LinuxInfo inf;
 
-    cout << inf.getCPUArch() << endl;
-    cout << inf.getCPUModel() << endl;
-    cout << inf.getCPUCoresNum() << endl;
+    cout << inf.getCurrentTasksNum() << endl;
+    cout << inf.getSystemUptime() << endl;
+    cout << inf.getTotalCPUUsage() << endl;
+    auto vec = inf.getCPUCoresUsage();
+    for (auto & i : vec) {
+        cout << i << endl;
+    }
 
     return 0;
 }
