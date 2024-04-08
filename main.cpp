@@ -9,5 +9,9 @@ int main() {
 
     LinuxInfo inf;
 
+    cout << inf.getCPUArch() << endl;
+    cout << inf.getCPUModel() << endl;
+    cout << inf.getCPUCoresNum() << endl;
+
     return 0;
 }

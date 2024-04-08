@@ -4,6 +4,7 @@
 #include "SysInfo.h"
 #include <fstream>
 #include <string>
+#include <sys/utsname.h>
 
 class LinuxInfo : public SysInfo {
 

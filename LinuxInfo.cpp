@@ -1,5 +1,51 @@
 #include "LinuxInfo.h"
 
+auto ltrim = [](std::string s) {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(),
+                                    std::not1(std::ptr_fun<int, int>(std::isspace))));
+    return s;
+};
+
+auto getint = [](std::string str) {
+
+    str.erase(std::remove_if(
+                      str.begin(),
+                      str.end(),
+                      [](char ch) {
+                          return !std::isdigit(ch);
+                      }),
+              str.end()
+    );
+    return std::stoi(str);
+};
+
+auto getdouble = [](std::string str) {
+
+    str.erase(std::remove_if(
+                      str.begin(),
+                      str.end(),
+                      [](char ch) {
+                          if (ch == '.') {
+                              return false;
+                          }
+                          return !std::isdigit(ch);
+                      }),
+              str.end()
+    );
+    return std::stod(str);
+};
+
+auto getval = [](std::string str) {
+
+    int i = 0;
+    do {
+        i++;
+    } while (str[i] != ':');
+    std::string res = str.substr(i + 1, str.size());
+    res.shrink_to_fit();
+    return res;
+};
+
 uint64_t LinuxInfo::getRAMTotal() {
     return si.totalram;
 }
@@ -15,11 +61,17 @@ uint64_t LinuxInfo::getRAMUsed() {
 }
 
 uint32_t LinuxInfo::getCPUCoresNum() {
-    return 0;
+    return cpuInfo.cores.size();
 }
 
 LinuxInfo::LinuxInfo() : SysInfo() {
     sysinfo(&si);
+
+    utsname kernelInfo{};
+
+    uname(&kernelInfo);
+
+    cpuInfo.arch = kernelInfo.machine;
 
     std::ifstream file("/proc/cpuinfo");
 
@@ -37,12 +89,25 @@ LinuxInfo::LinuxInfo() : SysInfo() {
 
     auto it = lines.begin();
 
+
     while (it != lines.end()) {
-        (*it).erase(remove_if((*it).begin(), (*it).end(), isspace), (*it).end());
 
-        int i = std::stoi(*it);
-
-        std::cout << i << std::endl;
+        if ((*it).starts_with("processor")) {
+            CPUInfo::Core core{(uint64_t) getint(*it)};
+            while (!(*(it)).starts_with("power management")) {
+                if ((*it).starts_with("model name")) {
+                    cpuInfo.model = ltrim(getval(*it));
+                } else if ((*it).starts_with("physical id")) {
+                    core.physicalId = (uint64_t) getint(*it);
+                } else if ((*it).starts_with("cpu MHz")) {
+                    core.speed = getdouble(*it);
+                } else if ((*it).starts_with("cache size")) {
+                    core.cacheSize = (uint64_t) getint(*it);
+                }
+                it++;
+            }
+            cpuInfo.cores.push_back(core);
+        }
 
         it++;
     }
@@ -58,11 +123,11 @@ std::string LinuxInfo::getOSArch() {
 }
 
 std::string LinuxInfo::getCPUModel() {
-    return std::string();
+    return cpuInfo.model;
 }
 
 std::string LinuxInfo::getCPUArch() {
-    return std::string();
+    return cpuInfo.arch;
 }
 
 std::string LinuxInfo::getVAModel() {

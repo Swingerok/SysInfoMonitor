@@ -33,13 +33,12 @@ public:
     struct CPUInfo { //Статическая инфа, она будет собираться при создании класса под линукс или виндовс
 
         struct Core {
-            uint64_t physicalId;
             uint64_t virtualId;
-            uint64_t speed;
+            uint64_t physicalId;
+            double speed;
             uint64_t cacheSize;
         };
 
-        uint64_t coresNum;
         std::vector<Core> cores;
         std::string model;
         std::string arch;
