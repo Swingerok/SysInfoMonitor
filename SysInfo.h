@@ -47,6 +47,7 @@ public:
 
 	struct DriveInfo
 	{
+
 		// какие придумаете/сможете получить параметры дисков (HDD/SSD/nvme/flash)
 	};
 	

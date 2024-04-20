@@ -87,11 +87,37 @@ std::string LinuxInfo::getCPUArch() {
 }
 
 std::string LinuxInfo::getVAModel() {
-    return std::string();
+
+    if (!gpu_model.empty()) {
+        return gpu_model;
+    }
+
+    // Инициализация библиотеки libpci
+    auto *pacc = pci_alloc();
+    pci_init(pacc);
+    pci_scan_bus(pacc);
+
+
+    // Поиск видеокарты
+    for (auto pdev = pacc->devices; pdev; pdev = pdev->next) {
+        pci_fill_info(pdev, PCI_FILL_IDENT | PCI_FILL_BASES | PCI_FILL_CLASS);
+        if (pdev->device_class == PCI_CLASS_DISPLAY_VGA) {
+            char vendor_name[1024];
+            pci_lookup_name(pacc, vendor_name, sizeof(vendor_name), PCI_LOOKUP_VENDOR, pdev->vendor_id);
+            gpu_model = vendor_name;
+        }
+    }
+
+    // Освобождение ресурсов
+    pci_cleanup(pacc);
+
+    return gpu_model;
 }
 
 uint64_t LinuxInfo::getVRAMTotal() {
-    return 0;
+    GLint totalMem;
+    glGetIntegerv(GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &totalMem);
+    return totalMem;
 }
 
 std::vector<LinuxInfo::DriveInfo> LinuxInfo::getDrivesInfo() {
@@ -123,15 +149,17 @@ uint32_t LinuxInfo::getTotalCPUUsage() {
 
     if (file.is_open()) {
         getline(file, str1);
+        str1.erase(std::find(str1.begin(), str1.end(), ' '));
     }
     file.close();
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
     std::ifstream file2("/proc/stat");
 
     if (file2.is_open()) {
         getline(file2, str2);
+        str2.erase(std::find(str2.begin(), str2.end(), ' '));
     }
     file2.close();
 
@@ -190,10 +218,10 @@ uint32_t LinuxInfo::calculateCPUUsage(std::string str1, std::string str2) {
     double work_1 = 0;
     double work_2 = 0;
 
-    for (int i = 2; i < first.size(); i++) {
+    for (int i = 1; i < first.size(); i++) {
         total_1 += std::stod(first[i]);
         total_2 += std::stod(second[i]);
-        if (i <= 4) {
+        if (i <= 3) {
             work_1 += std::stod(first[i]);
             work_2 += std::stod(second[i]);
         }

@@ -5,6 +5,10 @@
 #include <fstream>
 #include <string>
 #include <sys/utsname.h>
+#include <GL/gl.h>
+extern "C" {
+#include <pci/pci.h>
+};
 #include <chrono>
 #include <thread>
 #include "Str.h"
@@ -23,8 +27,8 @@ public:
 	std::string getCPUModel() override; //+
     std::string getCPUArch() override; //!< x86/x86_64/ARM/... +
 
-	std::string getVAModel() override; //!< VideoAdapter
-	uint64_t getVRAMTotal() override;
+	std::string getVAModel() override; //!< VideoAdapter +
+	uint64_t getVRAMTotal() override; //+
 
 	std::vector<DriveInfo> getDrivesInfo() override;
 
@@ -36,8 +40,8 @@ public:
 	uint64_t getRAMFree() override; // +
     uint64_t getRAMUsed() override; // +
 
-    uint32_t getTotalCPUUsage() override; //!< Общая от 0 до 100
-	std::vector <uint32_t> getCPUCoresUsage() override; //!< по ядрам от 0 до 100
+    uint32_t getTotalCPUUsage() override; //!< Общая от 0 до 100 +
+	std::vector <uint32_t> getCPUCoresUsage() override; //!< по ядрам от 0 до 100 +
     int getCurrentTasksNum() override; //!< текущее количество запущенных процессов +
 
 	uint64_t getDriveCurrentWrite(std::string driveName) override;
@@ -53,6 +57,7 @@ private:
     struct sysinfo si{};
     utsname kernelInf{};
     CPUInfo cpuInfo{};
+    std::string gpu_model;
 };
 
 

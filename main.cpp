@@ -9,13 +9,16 @@ int main() {
 
     LinuxInfo inf;
 
-    cout << inf.getCurrentTasksNum() << endl;
-    cout << inf.getSystemUptime() << endl;
-    cout << inf.getTotalCPUUsage() << endl;
-    auto vec = inf.getCPUCoresUsage();
-    for (auto & i : vec) {
-        cout << i << endl;
-    }
+    //cout << inf.getCurrentTasksNum() << endl;
+    //cout << inf.getSystemUptime() << endl;
+    //auto vec = inf.getCPUCoresUsage();
+    //for (auto &i: vec) {
+    //    cout << i << endl;
+    //}
+    //cout << inf.getTotalCPUUsage() << endl;
+
+    //cout << inf.getVRAMTotal() << endl;
+    cout << inf.getVAModel() << endl;
 
     return 0;
 }
