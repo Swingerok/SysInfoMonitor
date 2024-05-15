@@ -47,10 +47,11 @@ public:
 
 	struct DriveInfo
 	{
-
-		// какие придумаете/сможете получить параметры дисков (HDD/SSD/nvme/flash)
+        std::string name;
+        std::string model;
+        unsigned long long size;
 	};
-	
+
 	virtual std::vector<DriveInfo> getDrivesInfo() = 0;
 	
 	struct NetworkAdapterInfo

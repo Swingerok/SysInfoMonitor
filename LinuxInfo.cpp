@@ -2,8 +2,6 @@
 
 #include <utility>
 
-
-
 uint64_t LinuxInfo::getRAMTotal() {
     return si.totalram;
 }
@@ -48,16 +46,16 @@ LinuxInfo::LinuxInfo() : SysInfo() {
 
     while (it != lines.end()) {
 
-        if ((*it).starts_with("processor")) {
+        if (Str::starts_with((*it), "processor")) {
             CPUInfo::Core core{(uint64_t) Str::getint(*it)};
-            while (!(*(it)).starts_with("power management")) {
-                if ((*it).starts_with("model name")) {
+            while (!Str::starts_with((*it), "power management")) {
+                if (Str::starts_with((*it), "model name")) {
                     cpuInfo.model = Str::getval(*it);
-                } else if ((*it).starts_with("physical id")) {
+                } else if (Str::starts_with((*it), "physical id")) {
                     core.physicalId = (uint64_t) Str::getint(*it);
-                } else if ((*it).starts_with("cpu MHz")) {
+                } else if (Str::starts_with((*it), "cpu MHz")) {
                     core.speed = Str::getdouble(*it);
-                } else if ((*it).starts_with("cache size")) {
+                } else if (Str::starts_with((*it), "cache size")) {
                     core.cacheSize = Str::getint(*it);
                 }
                 it++;
@@ -120,8 +118,54 @@ uint64_t LinuxInfo::getVRAMTotal() {
     return totalMem;
 }
 
+SysInfo::DriveInfo getDriveInfo(const std::string &name) {
+    SysInfo::DriveInfo info;
+
+    info.name = name;
+
+    std::ifstream file("/sys/block/" + name + "/device/model");
+    std::string line;
+
+    if (file.is_open()) {
+        std::getline(file, line);
+        info.model = line;
+    }
+    file.close();
+
+    file.open("/sys/block/" + name + "/size");
+
+    if (file.is_open()) {
+        std::getline(file, line);
+        info.size = std::stoi(line); // bytes
+        info.size *= 512;
+    }
+    file.close();
+
+    return std::move(info);
+}
+
 std::vector<LinuxInfo::DriveInfo> LinuxInfo::getDrivesInfo() {
-    return std::vector<DriveInfo>();
+    std::vector<DriveInfo> drives;
+
+    std::ifstream file("/proc/partitions");
+    if (file.is_open()) {
+        std::string line;
+        std::getline(file, line); // Пропускаем оглавление
+        while (std::getline(file, line)) {
+            std::istringstream iss(line);
+            std::string major, minor, blocks, name;
+            if (iss >> major >> minor >> blocks >> name) {
+                if (std::filesystem::exists("/sys/block/" + name + "/device")) { // пропускаем разделы, не являющиеся физическими дисками
+                    drives.push_back(getDriveInfo(name));
+                }
+            }
+        }
+        file.close();
+    } else {
+        std::cerr << "Ошибка открытия /proc/partitions" << std::endl;
+    }
+
+    return drives;
 }
 
 std::vector<LinuxInfo::NetworkAdapterInfo> LinuxInfo::getNetworkAdaptersInfo() {
@@ -149,7 +193,7 @@ uint32_t LinuxInfo::getTotalCPUUsage() {
 
     if (file.is_open()) {
         getline(file, str1);
-        str1.erase(std::find(str1.begin(), str1.end(), ' '));
+        Str::erase(str1, ' ');
     }
     file.close();
 
@@ -159,7 +203,7 @@ uint32_t LinuxInfo::getTotalCPUUsage() {
 
     if (file2.is_open()) {
         getline(file2, str2);
-        str2.erase(std::find(str2.begin(), str2.end(), ' '));
+        Str::erase(str2, ' ');
     }
     file2.close();
 
@@ -177,7 +221,7 @@ std::vector<uint32_t> LinuxInfo::getCPUCoresUsage() {
     if (file.is_open()) {
         getline(file, temp);
         getline(file, temp);
-        while (temp.starts_with("cpu")) {
+        while (Str::starts_with(temp, "cpu")) {
             vec1.push_back(temp);
             getline(file, temp);
         }
@@ -191,7 +235,7 @@ std::vector<uint32_t> LinuxInfo::getCPUCoresUsage() {
     if (file2.is_open()) {
         getline(file2, temp);
         getline(file2, temp);
-        while (temp.starts_with("cpu")) {
+        while (Str::starts_with(temp, "cpu")) {
             vec2.push_back(temp);
             getline(file2, temp);
         }

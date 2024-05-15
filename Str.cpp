@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "Str.h"
 
 std::string Str::ltrim (std::string s) {
@@ -61,3 +62,34 @@ std::vector<std::string> Str::split(std::string str) {
 
     return std::move(vec);
 }
+
+bool Str::starts_with(const std::string &line, const std::string &sub) {
+    auto it1 = line.begin();
+    auto it2 = sub.begin();
+
+    if (line.size() < sub.size()) {
+        return false;
+    }
+
+    while (it2 != sub.end()) {
+        if ((*it1) != (*it2)) {
+            return false;
+        }
+        it1++;
+        it2++;
+    }
+
+    return true;
+}
+
+void Str::erase(std::string& str, const char &ch) {
+    auto it = str.begin();
+    while (it != str.end()) {
+        if ((*it) == ch) {
+            break;
+        }
+        it++;
+    }
+    str.erase(it);
+}
+

@@ -3,8 +3,13 @@
 
 #include "SysInfo.h"
 #include <fstream>
+#include <filesystem>
+#include <sstream>
+#include <unistd.h>
+#include <iterator>
 #include <string>
 #include <sys/utsname.h>
+#include <sys/statvfs.h>
 #include <GL/gl.h>
 extern "C" {
 #include <pci/pci.h>
@@ -12,6 +17,7 @@ extern "C" {
 #include <chrono>
 #include <thread>
 #include "Str.h"
+#include <libudev.h>
 
 class LinuxInfo : public SysInfo {
 
@@ -30,7 +36,7 @@ public:
 	std::string getVAModel() override; //!< VideoAdapter +
 	uint64_t getVRAMTotal() override; //+
 
-	std::vector<DriveInfo> getDrivesInfo() override;
+	std::vector<DriveInfo> getDrivesInfo() override; //+
 
 	std::vector<NetworkAdapterInfo> getNetworkAdaptersInfo() override;
 

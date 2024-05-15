@@ -17,6 +17,10 @@ public:
     static std::string getval(std::string str);
 
     static std::vector<std::string> split(std::string str);
+
+    static bool starts_with(const std::string& line, const std::string& sub);
+
+    static void erase(std::string &str, const char &ch);
 };
 
 
