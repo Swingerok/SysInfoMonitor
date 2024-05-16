@@ -5,11 +5,15 @@
 #include <fstream>
 #include <filesystem>
 #include <sstream>
-#include <unistd.h>
 #include <iterator>
 #include <string>
 #include <sys/utsname.h>
 #include <sys/statvfs.h>
+#include <ifaddrs.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <cstring>
+#include <unistd.h>
 #include <GL/gl.h>
 extern "C" {
 #include <pci/pci.h>
@@ -25,6 +29,8 @@ public:
 
     LinuxInfo();
 
+    std::string getOSFamily() override; // +
+
     uint64_t getRAMTotal() override; //!< Пусть все функции занимаемой памяти возвращают размер в байтах пока что +
 	uint32_t getCPUCoresNum() override; // +
 
@@ -38,7 +44,7 @@ public:
 
 	std::vector<DriveInfo> getDrivesInfo() override; //+
 
-	std::vector<NetworkAdapterInfo> getNetworkAdaptersInfo() override;
+	std::vector<NetworkAdapterInfo> getNetworkAdaptersInfo() override; //+
 
 	//! Функции получения динамической информации о ресурсах системы
 	double getSystemUptime() override;	//!< время в формате double (целая часть - секунды, вещественная - остальное) +
@@ -53,11 +59,13 @@ public:
 	uint64_t getDriveCurrentWrite(std::string driveName) override;
 	uint64_t getDriveCurrentRead(std::string driveName) override;
 
-    uint64_t getNetworkAdapterCurrentUpload(std::string adapterName) override;
-	uint64_t getNetworkAdapterCurrentDownload(std::string adapterName) override;
+    uint64_t getNetworkAdapterCurrentUpload(std::string adapterName) override; //+
+	uint64_t getNetworkAdapterCurrentDownload(std::string adapterName) override; //+
 
 private:
     uint32_t calculateCPUUsage(std::string str1, std::string str2);
+    uint64_t print_interface_speed(const std::string &name);
+    uint64_t read_net_stat(const std::string &path);
 
 private:
     struct sysinfo si{};
@@ -67,4 +75,4 @@ private:
 };
 
 
-#endif //UNTITLED1_LINUXINFO_H
+#endif

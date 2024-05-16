@@ -1,6 +1,7 @@
 #include "LinuxInfo.h"
 
 #include <utility>
+#include <netdb.h>
 
 uint64_t LinuxInfo::getRAMTotal() {
     return si.totalram;
@@ -155,7 +156,8 @@ std::vector<LinuxInfo::DriveInfo> LinuxInfo::getDrivesInfo() {
             std::istringstream iss(line);
             std::string major, minor, blocks, name;
             if (iss >> major >> minor >> blocks >> name) {
-                if (std::filesystem::exists("/sys/block/" + name + "/device")) { // пропускаем разделы, не являющиеся физическими дисками
+                if (std::filesystem::exists(
+                        "/sys/block/" + name + "/device")) { // пропускаем разделы, не являющиеся физическими дисками
                     drives.push_back(getDriveInfo(name));
                 }
             }
@@ -169,7 +171,86 @@ std::vector<LinuxInfo::DriveInfo> LinuxInfo::getDrivesInfo() {
 }
 
 std::vector<LinuxInfo::NetworkAdapterInfo> LinuxInfo::getNetworkAdaptersInfo() {
-    return std::vector<NetworkAdapterInfo>();
+
+    std::vector<NetworkAdapterInfo> vec;
+
+    struct ifaddrs *interfaces, *ifa;
+    NetworkAdapterInfo adapter;
+    int family;
+    std::string name;
+    std::string address;
+    std::string netmask;
+    std::string broadcast;
+    char host[NI_MAXHOST];
+
+    // Получение списка интерфейсов
+    if (getifaddrs(&interfaces) == -1) {
+        perror("getifaddrs");
+        return {};
+    }
+
+    for (ifa = interfaces; ifa != nullptr; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr == nullptr) continue;
+
+        family = ifa->ifa_addr->sa_family;
+
+        name = ifa->ifa_name;
+
+        // Обработка IPv4 и IPv6 адресов
+        if (family == AF_INET || family == AF_INET6) {
+            int s = getnameinfo(ifa->ifa_addr,
+                                (family == AF_INET) ? sizeof(struct sockaddr_in) :
+                                sizeof(struct sockaddr_in6),
+                                host, NI_MAXHOST,
+                                nullptr, 0, NI_NUMERICHOST);
+            if (s != 0) {
+                std::cerr << "getnameinfo() failed: " << gai_strerror(s) << std::endl;
+                continue;
+            }
+
+            address = host;
+        } else {
+            continue;
+        }
+
+        // Получение маски подсети
+        if (ifa->ifa_netmask) {
+            int s = getnameinfo(ifa->ifa_netmask,
+                                (family == AF_INET) ? sizeof(struct sockaddr_in) :
+                                sizeof(struct sockaddr_in6),
+                                host, NI_MAXHOST,
+                                nullptr, 0, NI_NUMERICHOST);
+            if (s != 0) {
+                std::cerr << "getnameinfo() failed: " << gai_strerror(s) << std::endl;
+                continue;
+            }
+            netmask = host;
+        } else {
+            continue;
+        }
+
+        // Получение адреса вещания (только для IPv4)
+        if (family == AF_INET && ifa->ifa_broadaddr) {
+            int s = getnameinfo(ifa->ifa_broadaddr,
+                                sizeof(struct sockaddr_in),
+                                host, NI_MAXHOST,
+                                nullptr, 0, NI_NUMERICHOST);
+            if (s != 0) {
+                std::cerr << "getnameinfo() failed: " << gai_strerror(s) << std::endl;
+                continue;
+            }
+
+            broadcast = host;
+        } else {
+            continue;
+        }
+
+        vec.push_back({family, name, address, netmask, broadcast});
+    }
+
+    freeifaddrs(interfaces);
+
+    return std::move(vec);
 }
 
 double LinuxInfo::getSystemUptime() {
@@ -271,7 +352,7 @@ uint32_t LinuxInfo::calculateCPUUsage(std::string str1, std::string str2) {
         }
     }
 
-    double work =  work_2 - work_1;
+    double work = work_2 - work_1;
     double total = total_2 - total_1;
 
     return (work / total) * 100;
@@ -290,10 +371,33 @@ uint64_t LinuxInfo::getDriveCurrentRead(std::string driveName) {
     return 0;
 }
 
+uint64_t LinuxInfo::read_net_stat(const std::string &path) {
+    std::ifstream file(path);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open " << path << std::endl;
+        return 0;
+    }
+    uint64_t value;
+    file >> value;
+    return value;
+}
+
+uint64_t LinuxInfo::print_interface_speed(const std::string &name) {
+    std::string base_path = "/sys/class/net/";
+    std::string path = base_path + name;
+
+    return read_net_stat(path);
+}
+
 uint64_t LinuxInfo::getNetworkAdapterCurrentUpload(std::string adapterName) {
-    return 0;
+
+    return print_interface_speed(adapterName + "/statistics/tx_bytes");
 }
 
 uint64_t LinuxInfo::getNetworkAdapterCurrentDownload(std::string adapterName) {
-    return 0;
+    return print_interface_speed(adapterName + "/statistics/rx_bytes");
+}
+
+std::string LinuxInfo::getOSFamily() {
+    return "Linux";
 }

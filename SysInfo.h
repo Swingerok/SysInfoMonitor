@@ -19,7 +19,7 @@ public:
 	//! Если ещё придумаете про сеть и диски - добавляйте
     
 	//! Функции получения статической информации о самой системе
-	std::string getOSFamily(); //!< Windows/Linux/Unix/MacOS/...
+	virtual std::string getOSFamily() = 0; //!< Windows/Linux/Unix/MacOS/...
     virtual std::string getOSVersion() = 0;
 	virtual std::string getOSArch() = 0; //!< x86/x86_64/ARM/...
 	virtual std::string getCPUModel() = 0;
@@ -56,7 +56,11 @@ public:
 	
 	struct NetworkAdapterInfo
 	{
-		// какие придумаете/сможете получить параметры сетевых адаптеров
+        int family;
+        std::string name;
+        std::string address;
+        std::string netmask;
+        std::string broadcast;
 	};
 	
 	virtual std::vector<NetworkAdapterInfo> getNetworkAdaptersInfo() = 0;
