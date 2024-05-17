@@ -1,5 +1,9 @@
 #include "SysInfo.h"
 
-SysInfo::SysInfo() {
+#include <utility>
+
+SysInfo::SysInfo(std::string OSFamily) :
+    OSFamily(std::move(OSFamily))
+{
 
 }

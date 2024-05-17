@@ -27,7 +27,7 @@ class LinuxInfo : public SysInfo {
 
 public:
 
-    LinuxInfo();
+    explicit LinuxInfo(std::string OSFamily);
 
     std::string getOSFamily() override; // +
 

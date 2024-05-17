@@ -21,7 +21,7 @@ uint32_t LinuxInfo::getCPUCoresNum() {
     return cpuInfo.cores.size();
 }
 
-LinuxInfo::LinuxInfo() : SysInfo() {
+LinuxInfo::LinuxInfo(std::string OSFamily) : SysInfo(std::move(OSFamily)) {
     sysinfo(&si);
 
     uname(&kernelInf);
@@ -145,7 +145,7 @@ SysInfo::DriveInfo getDriveInfo(const std::string &name) {
     return std::move(info);
 }
 
-std::vector<LinuxInfo::DriveInfo> LinuxInfo::getDrivesInfo() {
+std::vector<SysInfo::DriveInfo> LinuxInfo::getDrivesInfo() {
     std::vector<DriveInfo> drives;
 
     std::ifstream file("/proc/partitions");
@@ -399,5 +399,5 @@ uint64_t LinuxInfo::getNetworkAdapterCurrentDownload(std::string adapterName) {
 }
 
 std::string LinuxInfo::getOSFamily() {
-    return "Linux";
+    return OSFamily;
 }

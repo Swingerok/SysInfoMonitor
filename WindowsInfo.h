@@ -6,6 +6,11 @@
 class WindowsInfo : public SysInfo {
 
 public:
+
+    explicit WindowsInfo(std::string OSFamily);
+
+    std::string getOSFamily() override;
+
     uint64_t getRAMTotal() override; //!< Пусть все функции занимаемой памяти возвращают размер в байтах пока что
 	uint32_t getCPUCoresNum() override;
 
@@ -19,7 +24,7 @@ public:
 
 	std::vector<DriveInfo> getDrivesInfo() override;
 
-	std::vector<NetworkAdapterInfo> getNetworkAdaptersInfo() = 0;
+	std::vector<NetworkAdapterInfo> getNetworkAdaptersInfo() override;
 
 	//! Функции получения динамической информации о ресурсах системы
 	double getSystemUptime() override;	//!< время в формате double (целая часть - секунды, вещественная - остальное)
@@ -29,7 +34,7 @@ public:
 
     uint32_t getTotalCPUUsage() override; //!< Общая от 0 до 100
 	std::vector <uint32_t> getCPUCoresUsage() override; //!< по ядрам от 0 до 100
-    int getCurrentTasksNum() = 0; //!< текущее количество запущенных процессов
+    int getCurrentTasksNum() override; //!< текущее количество запущенных процессов
 
 	uint64_t getDriveCurrentWrite(std::string driveName) override;
 	uint64_t getDriveCurrentRead(std::string driveName) override;

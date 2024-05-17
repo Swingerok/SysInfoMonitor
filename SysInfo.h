@@ -11,7 +11,9 @@ class SysInfo
 {
 public:
 
-    SysInfo();
+    explicit SysInfo(std::string OSFamily);
+
+    virtual ~SysInfo() = default;
 	
 	//! Функции получения статической информации о ресурсах системы
 	virtual uint64_t getRAMTotal() = 0; //!< Пусть все функции занимаемой памяти возвращают размер в байтах пока что
@@ -81,7 +83,8 @@ public:
     virtual uint64_t getNetworkAdapterCurrentUpload(std::string adapterName) = 0;
 	virtual uint64_t getNetworkAdapterCurrentDownload(std::string adapterName) = 0;
     
-private:
+protected:
+    std::string OSFamily;
 	//! Тут все дополнительные структуры данных, методы и поля класса,
 	//! необходимые для получения информации
 };

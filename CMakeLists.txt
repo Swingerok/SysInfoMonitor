@@ -4,7 +4,7 @@ project(SysInfoMonitor)
 set(CMAKE_CXX_STANDARD 17)
 
 add_executable(SysInfoMonitor
-        SysInfo.h main.cpp SysInfo.cpp LinuxInfo.cpp LinuxInfo.h WindowsInfo.cpp WindowsInfo.h Str.cpp Str.h)
+        SysInfo.h main.cpp SysInfo.cpp LinuxInfo.cpp LinuxInfo.h WindowsInfo.cpp WindowsInfo.h Str.cpp Str.h SysInfoFactory.h)
 
 
 find_package(OpenGL REQUIRED)
