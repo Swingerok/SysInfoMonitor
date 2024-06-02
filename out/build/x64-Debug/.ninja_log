@@ -1,0 +1,23 @@
+# ninja log v5
+9	588	7390521049779547	CMakeFiles/SysInfoMonitor.dir/SysInfo.cpp.obj	1f249e6e532259c0
+15	1303	7390521056913244	CMakeFiles/SysInfoMonitor.dir/WindowsInfo.cpp.obj	a843b74f5f5958ef
+1141	1468	7390521289301964	SysInfoMonitor.exe	442a8f4cfa0a81c4
+12	1141	7390521286986063	CMakeFiles/SysInfoMonitor.dir/main.cpp.obj	8e78443ea7f0d669
+12	1454	7390531659616282	CMakeFiles/SysInfoMonitor.dir/main.cpp.obj	8e78443ea7f0d669
+18	1486	7390531659938567	CMakeFiles/SysInfoMonitor.dir/WindowsInfo.cpp.obj	a843b74f5f5958ef
+1486	1974	7390531662843339	SysInfoMonitor.exe	442a8f4cfa0a81c4
+12	1205	7390533383677538	CMakeFiles/SysInfoMonitor.dir/main.cpp.obj	8e78443ea7f0d669
+20	1230	7390533383948572	CMakeFiles/SysInfoMonitor.dir/WindowsInfo.cpp.obj	a843b74f5f5958ef
+1230	1687	7390533387577886	SysInfoMonitor.exe	442a8f4cfa0a81c4
+12	1143	7390534108478975	CMakeFiles/SysInfoMonitor.dir/main.cpp.obj	8e78443ea7f0d669
+1143	1442	7390534110398402	SysInfoMonitor.exe	442a8f4cfa0a81c4
+2	1119	7390535098755119	CMakeFiles/SysInfoMonitor.dir/WindowsInfo.cpp.obj	a843b74f5f5958ef
+1120	1525	7390535101369387	SysInfoMonitor.exe	442a8f4cfa0a81c4
+12	1167	7390535239459026	CMakeFiles/SysInfoMonitor.dir/WindowsInfo.cpp.obj	a843b74f5f5958ef
+1167	1507	7390535241716801	SysInfoMonitor.exe	442a8f4cfa0a81c4
+13	1172	7390539934412440	CMakeFiles/SysInfoMonitor.dir/WindowsInfo.cpp.obj	a843b74f5f5958ef
+1172	1533	7390539936792154	SysInfoMonitor.exe	442a8f4cfa0a81c4
+13	1235	7390540090757848	CMakeFiles/SysInfoMonitor.dir/WindowsInfo.cpp.obj	a843b74f5f5958ef
+1236	1662	7390540093665268	SysInfoMonitor.exe	442a8f4cfa0a81c4
+13	1203	7390540605002151	CMakeFiles/SysInfoMonitor.dir/WindowsInfo.cpp.obj	a843b74f5f5958ef
+1203	1530	7390540607268135	SysInfoMonitor.exe	442a8f4cfa0a81c4

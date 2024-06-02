@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <string>
 #include <utility>
-#include <sys/sysinfo.h>
 #include <iostream>
 
 class SysInfo

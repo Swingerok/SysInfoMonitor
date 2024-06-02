@@ -1,5 +1,4 @@
-#ifndef UNTITLED1_WINDOWSINFO_H
-#define UNTITLED1_WINDOWSINFO_H
+#pragma once
 #include <windows.h>
 #include <iostream>
 #include <string.h>
@@ -24,95 +23,7 @@
 #include <chrono>
 #include "SysInfo.h"
 
-namespace patch
-{
-	template < typename T > std::string to_string(const T& n)
-	{
-		std::ostringstream stm;
-		stm << n;
-		return stm.str();
-	}
-}
-
-//for drives
-bool dirExists(const std::string& dirName_in)
-{
-	DWORD ftyp = GetFileAttributesA(dirName_in.c_str());
-	if (ftyp == INVALID_FILE_ATTRIBUTES)
-		return false;  //something is wrong with your path!
-
-	if (ftyp & FILE_ATTRIBUTE_DIRECTORY)
-		return true;   // this is a directory!
-
-	return false;    // this is not a directory!
-}
-
-//for str => LPCWSTR
-LPCWSTR stringToLPCWSTR(string a)
-{
-	// Initializing an object of wstring
-	wstring temp = wstring(a.begin(), a.end());
-
-	// Applying c_str() method on temp
-	LPCWSTR wideString = temp.c_str();
-	return wideString;
-}
-
-//for char => LPWSTR
-LPWSTR CharToLPWSTR(LPCSTR char_string)
-{
-	LPWSTR res;
-	DWORD res_len = MultiByteToWideChar(1251, 0, char_string, -1, NULL, 0);
-	res = (LPWSTR)GlobalAlloc(GPTR, (res_len + 1) * sizeof(WCHAR));
-	MultiByteToWideChar(1251, 0, char_string, -1, res, res_len);
-	return res;
-}
-
-//for vendor
-namespace
-{
-	struct cpuid_regs
-	{
-		DWORD   Eax;
-		DWORD   Ebx;
-		DWORD   Ecx;
-		DWORD   Edx;
-	};
-	std::string SplitIntoChars(DWORD Value)
-	{
-		std::string Str;
-		char const* pCursor = (char const*)&Value;
-		for (int i = 0; i < sizeof(Value); ++i) {
-			Str += pCursor[i];
-		}
-		return Str;
-	}
-	std::string GetCpuVendorSubstring(DWORD Eax)
-	{
-		cpuid_regs Regs;
-		__cpuid((int*)&Regs, Eax);
-		std::string Str;
-		Str += SplitIntoChars(Regs.Eax);
-		Str += SplitIntoChars(Regs.Ebx);
-		Str += SplitIntoChars(Regs.Ecx);
-		Str += SplitIntoChars(Regs.Edx);
-		return Str;
-	}
-	std::string GetCpuVendorString()
-	{
-		std::string VendorString;
-		cpuid_regs Regs;
-		__cpuid((int*)&Regs, 0x80000000);
-		if (Regs.Eax >= 0x80000004)
-		{
-			VendorString =
-				GetCpuVendorSubstring(0x80000002) +
-				GetCpuVendorSubstring(0x80000003) +
-				GetCpuVendorSubstring(0x80000004);
-		}
-		return VendorString;
-	}
-}
+using namespace std;
 
 class WindowsInfo : public SysInfo {
 
@@ -156,5 +67,3 @@ public:
 private:
 
 };
-
-#endif
