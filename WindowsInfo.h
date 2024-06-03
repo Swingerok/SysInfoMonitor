@@ -1,7 +1,29 @@
-#ifndef UNTITLED1_WINDOWSINFO_H
-#define UNTITLED1_WINDOWSINFO_H
+#pragma once
+#include <windows.h>
+#include <iostream>
+#include <string.h>
+#include <intrin.h>
+#include <vector>
+#include <VersionHelpers.h>
+#include <tlhelp32.h>
+#include <sstream>
 
+#define _WIN32_DCOM
+#include <tchar.h>
+#include <comdef.h>
+#include <Wbemidl.h>
+# pragma comment(lib, "wbemuuid.lib")
+#include <urlmon.h>
+#include <winternl.h>
+
+#define SystemProcessorTimes 8
+#define MAX_PROCESSORS 32
+
+#include <wininet.h>
+#include <chrono>
 #include "SysInfo.h"
+
+using namespace std;
 
 class WindowsInfo : public SysInfo {
 
@@ -45,5 +67,3 @@ public:
 private:
 
 };
-
-#endif
