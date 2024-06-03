@@ -1,7 +1,25 @@
 #include "WindowsInfo.h"
 
 #include <utility>
+#pragma hdrstop
 
+#include <lmerr.h>
+#include <lmcons.h>
+#include <lmwksta.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <direct.h>
+#include <io.h>
+#include <conio.h>
+#include <atlbase.h>
+#include <comutil.h>
+
+#ifndef	ID_DEDICATED
+#include <comdef.h>
+#include <comutil.h>
+#include <Wbemidl.h>
+#endif
+using namespace ATL;
 namespace patch
 {
 	template < typename T > std::string to_string(const T& n)
@@ -230,11 +248,130 @@ std::string WindowsInfo::getCPUArch() {
 }
 
 std::string WindowsInfo::getVAModel() {
-    return std::string();
+	DISPLAY_DEVICEA dd;
+	dd.cb = sizeof(DISPLAY_DEVICEA);
+	EnumDisplayDevicesA(NULL, 0, &dd, EDD_GET_DEVICE_INTERFACE_NAME);
+	return string(dd.DeviceString);
+	/*
+	HRESULT hres;
+	string strFromBstr;
+	hres = CoInitializeEx(0, COINIT_MULTITHREADED);
+	if (FAILED(hres)) return 0;
+	hres = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
+	if (FAILED(hres)) {
+		CoUninitialize();
+		return 0;
+}
+	IWbemLocator* pLoc = NULL;
+	hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID*)&pLoc);
+	if (FAILED(hres)) {
+		CoUninitialize();
+		return 0;
+	}
+	IWbemServices* pSvc = NULL;
+	hres = pLoc->ConnectServer(_bstr_t(L"root\\CIMV2"), NULL, NULL, 0, NULL, 0, 0, &pSvc);
+	if (FAILED(hres)) {
+		pLoc->Release();
+		CoUninitialize();
+		return 0;
+	}
+	hres = CoSetProxyBlanket(pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
+	if (FAILED(hres)) {
+		pSvc->Release();
+		pLoc->Release();
+		CoUninitialize();
+		return 0;
+	}
+	IEnumWbemClassObject* pEnumerator = NULL;
+	hres = pSvc->ExecQuery(bstr_t("WQL"),
+		bstr_t("SELECT * FROM Win32_VideoController"),
+		WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
+	if (FAILED(hres)) {
+		pSvc->Release();
+		pLoc->Release();
+		CoUninitialize();
+		return 0;
+	}
+	IWbemClassObject* pclsObj;
+	ULONG uReturn = 0;
+	cout << "VA info:" << "\n";
+	while (pEnumerator)
+	{
+		HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
+		if (0 == uReturn)break;
+		VARIANT vtProp;
+		hr = pclsObj->Get(L"Caption", 0, &vtProp, 0, 0);
+		string strFromBstr = (const char*)_bstr_t(V_BSTR(&vtProp));
+		VariantClear(&vtProp);
+	}
+	pSvc->Release();
+	pLoc->Release();
+	pEnumerator->Release();
+	pclsObj->Release();
+	CoUninitialize();
+	return strFromBstr;
+	*/
 }
 
 uint64_t WindowsInfo::getVRAMTotal() {
-    return 0;
+	//cout << "1\n";
+#ifdef	ID_DEDICATED
+	return 0;
+#else
+	unsigned int retSize = 64;
+	//cout << "2\n";
+	CComPtr<IWbemLocator> spLoc = NULL;
+	HRESULT hr = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_SERVER, IID_IWbemLocator, (LPVOID*)&spLoc);
+	if (hr != S_OK || spLoc == NULL) {
+		//cout << hr;
+		//cout << "3\n";
+		return retSize;
+	}
+	//cout << "4\n";
+	CComBSTR bstrNamespace(_T("\\\\.\\root\\CIMV2"));
+	CComPtr<IWbemServices> spServices;
+	//cout << "5\n";
+	// Connect to CIM
+	hr = spLoc->ConnectServer(bstrNamespace, NULL, NULL, 0, NULL, 0, 0, &spServices);
+	if (hr != WBEM_S_NO_ERROR) {
+		cout << "6\n";
+		return retSize;
+	}
+	//cout << "7\n";
+	// Switch the security level to IMPERSONATE so that provider will grant access to system-level objects.  
+	hr = CoSetProxyBlanket(spServices, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
+	if (hr != S_OK) {
+		return retSize;
+	}
+
+	// Get the vid controller
+	CComPtr<IEnumWbemClassObject> spEnumInst = NULL;
+	hr = spServices->CreateInstanceEnum(CComBSTR("Win32_VideoController"), WBEM_FLAG_SHALLOW, NULL, &spEnumInst);
+	if (hr != WBEM_S_NO_ERROR || spEnumInst == NULL) {
+		return retSize;
+	}
+
+	ULONG uNumOfInstances = 0;
+	CComPtr<IWbemClassObject> spInstance[2];
+	hr = spEnumInst->Next(10000, 2, (IWbemClassObject**)spInstance, &uNumOfInstances);
+	//cout << "2\n";
+	if (hr == S_OK && spInstance) {
+		// Get properties from the object
+		CComVariant varSize;
+		for (int i = 0; i < uNumOfInstances; i++)
+		{
+			hr = spInstance[i]->Get(CComBSTR(_T("AdapterRAM")), 0, &varSize, 0, 0);
+			if (hr == S_OK) {
+				retSize = varSize.intVal / (1024 * 1024);
+				if (retSize == 0) {
+					retSize = 64;
+				}
+			}
+		}
+	}
+	//cout << "1\n";
+	return retSize / (1024);
+#endif
 }
 
 std::vector<SysInfo::DriveInfo> WindowsInfo::getDrivesInfo() {

@@ -5,6 +5,7 @@
 using namespace std;
 
 int main() {
+    ::CoInitialize(NULL);
 
     std::unique_ptr<SysInfo> inf = SysInfoFactory::createSysInfo();
 
@@ -24,7 +25,7 @@ int main() {
 
     cout << "Cpu cores num: " << inf->getCPUCoresNum() << endl;
 
-    cout << "VA Model: " << inf->getVAModel() << endl;
+    //cout << "VA Model: " << inf->getVAModel() << endl;
 
     cout << "Video RAM Total: " << inf->getVRAMTotal() / 1024 << " Mb" << endl;
 
@@ -64,6 +65,5 @@ int main() {
         cout << "Size: " << drive.size / 1024 / 1024 / 1024 << " Gb" << endl;
         cout << "-----------------------" << endl;
     }
-
     return 0;
 }
