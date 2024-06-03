@@ -67,19 +67,19 @@ bool dirExists(const std::string& dirName_in)
 SysInfo::DriveInfo HDD(char DiscLitera)
 {
 	bool Flag;
-	string dl = patch::to_string(DiscLitera); // получаем литеру диска
+	string dl = patch::to_string(DiscLitera); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 	string path = patch::to_string(DiscLitera) + ":\\";
 	SysInfo::DriveInfo info;
-	// здесь узнаём готово ли устройство
+	// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	WORD OldErrorMode;
-	OldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS); // убираем показ ошибок
-	bool ready = dirExists(path); // пытаемcя открыть корневsую директорию
-	SetErrorMode(OldErrorMode); // восстанавливаем старый режим показа ошибок
+	OldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+	bool ready = dirExists(path); // пїЅпїЅпїЅпїЅпїЅпїЅcпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅsпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+	SetErrorMode(OldErrorMode); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 
 	info.name = (string)"Drive " + dl;
 	if (ready)
 	{
-		UINT drive_type = GetDriveType(((dl + ":\\").c_str())); // узнаём тип диска
+		UINT drive_type = GetDriveType(((dl + ":\\").c_str())); // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		if (drive_type == DRIVE_REMOVABLE) info.model = "REMOVABLE";
 		else if (drive_type == DRIVE_FIXED)	 info.model = "FIXED";
 		else if (drive_type == DRIVE_REMOTE)	info.model = "REMOTE";
@@ -87,7 +87,7 @@ SysInfo::DriveInfo HDD(char DiscLitera)
 		else if (drive_type == DRIVE_RAMDISK)   info.model = "RAMDISK";
 		else info.model = "UNKNOWN TYPE";
 
-		// если это HDD - заприашиваем информацию о нем
+		// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ HDD - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ
 		if (drive_type == DRIVE_FIXED)
 		{
 			unsigned __int64 FreeBytesAvailable;
@@ -98,7 +98,7 @@ SysInfo::DriveInfo HDD(char DiscLitera)
 			DWORD drive_sn;
 			DWORD drive_name_size = sizeof(drive_label);
 
-			// получаем данные о размерах
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			Flag = ::GetDiskFreeSpaceEx((path.c_str()),
 				(PULARGE_INTEGER)&FreeBytesAvailable,
 				(PULARGE_INTEGER)&TotalNumberOfBytes,
@@ -512,5 +512,5 @@ std::string WindowsInfo::getOSFamily() {
 }
 
 WindowsInfo::WindowsInfo(std::string OSFamily) : SysInfo(std::move(OSFamily)) {
-
+    ::CoInitialize(NULL);
 }

@@ -1,7 +1,5 @@
 #include "LinuxInfo.h"
 
-#include <utility>
-#include <netdb.h>
 
 uint64_t LinuxInfo::getRAMTotal() {
     return si.totalram;

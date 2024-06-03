@@ -5,7 +5,6 @@
 using namespace std;
 
 int main() {
-    ::CoInitialize(NULL);
 
     std::unique_ptr<SysInfo> inf = SysInfoFactory::createSysInfo();
 

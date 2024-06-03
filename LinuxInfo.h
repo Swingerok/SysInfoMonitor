@@ -9,6 +9,9 @@
 #include <string>
 #include <sys/utsname.h>
 #include <sys/statvfs.h>
+#include <sys/sysinfo.h>
+#include <utility>
+#include <netdb.h>
 #include <ifaddrs.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
