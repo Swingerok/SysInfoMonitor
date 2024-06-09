@@ -19,6 +19,8 @@
 #include <comutil.h>
 #include <Wbemidl.h>
 #endif
+
+
 using namespace ATL;
 namespace patch
 {
@@ -67,19 +69,18 @@ bool dirExists(const std::string& dirName_in)
 SysInfo::DriveInfo HDD(char DiscLitera)
 {
 	bool Flag;
-	string dl = patch::to_string(DiscLitera); // �������� ������ �����
+	string dl = patch::to_string(DiscLitera);
 	string path = patch::to_string(DiscLitera) + ":\\";
 	SysInfo::DriveInfo info;
-	// ����� ����� ������ �� ����������
 	WORD OldErrorMode;
-	OldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS); // ������� ����� ������
-	bool ready = dirExists(path); // ������c� ������� ������s�� ����������
-	SetErrorMode(OldErrorMode); // ��������������� ������ ����� ������ ������
+	OldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
+	bool ready = dirExists(path);
+	SetErrorMode(OldErrorMode);
 
 	info.name = (string)"Drive " + dl;
 	if (ready)
 	{
-		UINT drive_type = GetDriveType(((dl + ":\\").c_str())); // ����� ��� �����
+		UINT drive_type = GetDriveType(((dl + ":\\").c_str()));
 		if (drive_type == DRIVE_REMOVABLE) info.model = "REMOVABLE";
 		else if (drive_type == DRIVE_FIXED)	 info.model = "FIXED";
 		else if (drive_type == DRIVE_REMOTE)	info.model = "REMOTE";
@@ -87,7 +88,6 @@ SysInfo::DriveInfo HDD(char DiscLitera)
 		else if (drive_type == DRIVE_RAMDISK)   info.model = "RAMDISK";
 		else info.model = "UNKNOWN TYPE";
 
-		// ���� ��� HDD - ������������ ���������� � ���
 		if (drive_type == DRIVE_FIXED)
 		{
 			unsigned __int64 FreeBytesAvailable;
@@ -98,7 +98,6 @@ SysInfo::DriveInfo HDD(char DiscLitera)
 			DWORD drive_sn;
 			DWORD drive_name_size = sizeof(drive_label);
 
-			// �������� ������ � ��������
 			Flag = ::GetDiskFreeSpaceEx((path.c_str()),
 				(PULARGE_INTEGER)&FreeBytesAvailable,
 				(PULARGE_INTEGER)&TotalNumberOfBytes,
@@ -254,14 +253,13 @@ std::string WindowsInfo::getVAModel() {
 	return string(dd.DeviceString);
 	/*
 	HRESULT hres;
-	string strFromBstr;
 	hres = CoInitializeEx(0, COINIT_MULTITHREADED);
 	if (FAILED(hres)) return 0;
 	hres = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
 	if (FAILED(hres)) {
 		CoUninitialize();
 		return 0;
-}
+	}
 	IWbemLocator* pLoc = NULL;
 	hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID*)&pLoc);
 	if (FAILED(hres)) {
@@ -301,17 +299,18 @@ std::string WindowsInfo::getVAModel() {
 		if (0 == uReturn)break;
 		VARIANT vtProp;
 		hr = pclsObj->Get(L"Caption", 0, &vtProp, 0, 0);
-		string strFromBstr = (const char*)_bstr_t(V_BSTR(&vtProp));
+		wcout << vtProp.bstrVal << endl;
 		VariantClear(&vtProp);
 	}
 	pSvc->Release();
 	pLoc->Release();
 	pEnumerator->Release();
-	pclsObj->Release();
 	CoUninitialize();
-	return strFromBstr;
+	cout << "\n";
+	return 0;
 	*/
 }
+//работаем
 
 uint64_t WindowsInfo::getVRAMTotal() {
 	//cout << "1\n";
@@ -392,7 +391,10 @@ std::vector<SysInfo::NetworkAdapterInfo> WindowsInfo::getNetworkAdaptersInfo() {
 }
 
 double WindowsInfo::getSystemUptime() {
-	DWORD start_time = GetTickCount();
+	/*
+	cout << "In double format => " << (double)(sysTime.wHour + ((double)sysTime.wMinute / 100)) << endl;
+	*/
+	DWORD start_time = GetTickCount64();
 	double elapsed_time = static_cast<double>(start_time) / 1000.0;
 	return elapsed_time;
 
