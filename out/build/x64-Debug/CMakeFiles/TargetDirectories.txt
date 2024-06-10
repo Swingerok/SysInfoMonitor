@@ -1,3 +1,0 @@
-D:/VisualStudioProjects/GIT/out/build/x64-Debug/CMakeFiles/SysInfoMonitor.dir
-D:/VisualStudioProjects/GIT/out/build/x64-Debug/CMakeFiles/edit_cache.dir
-D:/VisualStudioProjects/GIT/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
